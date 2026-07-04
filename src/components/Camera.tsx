@@ -1,13 +1,34 @@
 import { useEffect, useRef, useState } from "react";
+import type { Lang } from "../types";
+
+const COPY = {
+  fr: {
+    unavailable: "Caméra indisponible. Importez plutôt une photo.",
+    preview: "Aperçu de la caméra",
+    cancel: "Annuler",
+    shoot: "Prendre la photo",
+    frame: "cadrez l'objet",
+  },
+  en: {
+    unavailable: "Camera unavailable. Upload a photo instead.",
+    preview: "Camera preview",
+    cancel: "Cancel",
+    shoot: "Take the photo",
+    frame: "frame the object",
+  },
+} as const;
 
 // Live camera capture via getUserMedia. Calls onCapture with a JPEG Blob.
 export default function Camera({
   onCapture,
   onCancel,
+  lang,
 }: {
   onCapture: (blob: Blob) => void;
   onCancel: () => void;
+  lang: Lang;
 }) {
+  const c = COPY[lang];
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +53,7 @@ export default function Camera({
           setReady(true);
         }
       } catch {
-        setError("Caméra indisponible. Importez plutôt une photo.");
+        setError(c.unavailable);
       }
     })();
     return () => {
@@ -66,7 +87,7 @@ export default function Camera({
             playsInline
             muted
             className="w-full h-full object-cover"
-            aria-label="Aperçu de la caméra"
+            aria-label={c.preview}
           />
         )}
         {ready && !error && (
@@ -79,17 +100,17 @@ export default function Camera({
           onClick={onCancel}
           className="font-sans text-sm text-gallery-paper/70 hover:text-gallery-paper px-4 py-2 transition-colors"
         >
-          Annuler
+          {c.cancel}
         </button>
         <button
           onClick={shoot}
           disabled={!ready || !!error}
           className="w-16 h-16 rounded-full bg-gallery-paper border-4 border-gallery-brass disabled:opacity-40 hover:scale-105 active:scale-95 transition-transform"
-          aria-label="Prendre la photo"
+          aria-label={c.shoot}
         />
         <div className="w-[72px]" />
       </div>
-      <p className="meta text-gallery-paper/50 text-xs mt-4 tracking-museum">cadrez l'objet</p>
+      <p className="meta text-gallery-paper/50 text-xs mt-4 tracking-museum">{c.frame}</p>
     </div>
   );
 }

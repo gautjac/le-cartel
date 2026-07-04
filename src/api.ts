@@ -1,8 +1,22 @@
 import type { Cartel, Lang } from "./types";
 
+const ERR = {
+  fr: {
+    status: (s: number) => `Erreur ${s}`,
+    empty: "Réponse vide du serveur",
+    incomplete: "Réponse incomplète du serveur",
+  },
+  en: {
+    status: (s: number) => `Error ${s}`,
+    empty: "Empty response from the server",
+    incomplete: "Incomplete response from the server",
+  },
+} as const;
+
 // POST the downscaled photo to /api/cartel and read the ndjson keepalive
 // stream, returning the final { result } | { error } JSON line.
 export async function requestCartel(base64: string, lang: Lang, hint: string): Promise<Cartel> {
+  const e = ERR[lang];
   const res = await fetch("/api/cartel", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -13,7 +27,7 @@ export async function requestCartel(base64: string, lang: Lang, hint: string): P
     // Non-streamed error path (e.g. 400/405/500 with a JSON body).
     const data = await res.json().catch(() => ({}));
     if (data?.result) return data.result as Cartel;
-    throw new Error(data?.error || `Erreur ${res.status}`);
+    throw new Error(data?.error || e.status(res.status));
   }
 
   const reader = res.body.getReader();
@@ -39,9 +53,9 @@ export async function requestCartel(base64: string, lang: Lang, hint: string): P
   const tail = buffer.trim();
   if (tail) last = JSON.parse(tail);
 
-  if (!last || typeof last !== "object") throw new Error("Réponse vide du serveur");
+  if (!last || typeof last !== "object") throw new Error(e.empty);
   const obj = last as { result?: Cartel; error?: string };
   if (obj.error) throw new Error(obj.error);
-  if (!obj.result) throw new Error("Réponse incomplète du serveur");
+  if (!obj.result) throw new Error(e.incomplete);
   return obj.result;
 }

@@ -28,6 +28,7 @@ const LABELS = {
     delete: "Retirer de la collection",
     errorNet: "Le musée est injoignable. Réessayez.",
     errorImg: "Image illisible.",
+    errorExport: "Export impossible.",
     subject: "Sujet de l'exposition",
   },
   en: {
@@ -47,12 +48,23 @@ const LABELS = {
     delete: "Deaccession",
     errorNet: "The museum is unreachable. Try again.",
     errorImg: "Unreadable image.",
+    errorExport: "Export failed.",
     subject: "Subject of the exhibition",
   },
 } as const;
 
+const LANG_KEY = "cartel.lang";
+function initialLang(): Lang {
+  const saved = localStorage.getItem(LANG_KEY);
+  if (saved === "fr" || saved === "en") return saved;
+  return navigator.language?.toLowerCase().startsWith("en") ? "en" : "fr";
+}
+
 export default function App() {
-  const [lang, setLang] = useState<Lang>("fr");
+  const [lang, setLang] = useState<Lang>(initialLang);
+  useEffect(() => {
+    localStorage.setItem(LANG_KEY, lang);
+  }, [lang]);
   const [onboard, setOnboard] = useState(() => !localStorage.getItem("cartel.seen"));
   const [camera, setCamera] = useState(false);
 
@@ -82,9 +94,9 @@ export default function App() {
       const shrunk = await downscaleToJpeg(blob, 1024, 0.8);
       setPhoto(shrunk);
     } catch {
-      setError(LABELS.fr.errorImg);
+      setError(LABELS[lang].errorImg);
     }
-  }, []);
+  }, [lang]);
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -125,11 +137,11 @@ export default function App() {
       const blob = await placardPng(view.cartel);
       downloadBlob(blob, `${slug(view.cartel.title)}.png`);
     } catch {
-      setError("Export impossible.");
+      setError(t.errorExport);
     } finally {
       setExporting(false);
     }
-  }, [view]);
+  }, [view, t.errorExport]);
 
   const remove = useCallback(
     async (id?: number) => {
@@ -156,9 +168,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen wall flex flex-col">
-      {onboard && <Onboarding onClose={dismissOnboard} />}
+      {onboard && <Onboarding onClose={dismissOnboard} lang={lang} />}
       {camera && (
         <Camera
+          lang={lang}
           onCapture={(b) => {
             setCamera(false);
             void acceptImage(b);
