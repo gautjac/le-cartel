@@ -1,0 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f4f1ea;
+  color: #26241f;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+/* Gallery-wall texture: the faintest vertical light gradient. */
+.wall {
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(255, 255, 255, 0.7), transparent 60%),
+    linear-gradient(180deg, #f6f3ec 0%, #efebe1 100%);
+}
+
+/* Small-caps museum signage label. */
+.meta {
+  font-family: "Inter", system-ui, sans-serif;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+}
+
+.tracking-museum {
+  letter-spacing: 0.22em;
+}
+
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fadeup {
+  animation: fadeup 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.shimmer {
+  background: linear-gradient(90deg, #efeadd 25%, #f7f4ec 50%, #efeadd 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::selection {
+  background: rgba(176, 141, 87, 0.25);
+}
+
+*:focus-visible {
+  outline: 2px solid #b08d57;
+  outline-offset: 2px;
+}
